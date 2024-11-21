@@ -23,6 +23,37 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "production-microservice"
+          volumeMounts:
+            - name: queue-data
+              mountPath: /data  # Chemin dans le conteneur où le volume sera monté
+      volumes:
+        - name: queue-data
+          persistentVolumeClaim:
+            claimName: queue-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: queue-data-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/data/queue  # Chemin sur le nœud Kubernetes pour stocker les données
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: queue-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
