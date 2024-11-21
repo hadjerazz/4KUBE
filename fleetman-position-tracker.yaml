@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fleetman-position-tracker
+  labels:
+    app: fleetman
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fleetman-position-tracker
+  template:
+    metadata:
+      labels:
+        app: fleetman-position-tracker
+    spec:
+      containers:
+        - name: position-tracker
+          image: supinfo4kube/position-tracker:1.0.1
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "production-microservice" # Changement pour Kubernetes
+          ports:
+            - containerPort: 8080 # Le port utilisé dans le conteneur
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-position-tracker
+spec:
+  selector:
+    app: fleetman-position-tracker
+  ports:
+    - name: http
+      protocol: TCP
+      port: 30010
+      targetPort: 8080
+  type: ClusterIP

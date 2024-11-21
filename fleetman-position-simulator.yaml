@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fleetman-position-simulator
+  labels:
+    app: fleetman
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fleetman-position-simulator
+  template:
+    metadata:
+      labels:
+        app: fleetman-position-simulator
+    spec:
+      containers:
+        - name: position-simulator
+          image: supinfo4kube/position-simulator:1.0.1
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "production-microservice" # Change for Kubernetes
+          ports:
+            - containerPort: 8080 # Replace with the actual port if required
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-position-simulator
+spec:
+  selector:
+    app: fleetman-position-simulator
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
