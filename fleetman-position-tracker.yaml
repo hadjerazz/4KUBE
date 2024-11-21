@@ -22,7 +22,14 @@ spec:
               value: "production-microservice" # Changement pour Kubernetes
           ports:
             - containerPort: 8080 # Le port utilisé dans le conteneur
+          volumeMounts:
+            - mountPath: /data/db # Chemin où les données seront montées dans le conteneur
+              name: db-storage
       restartPolicy: Always
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: fleetman-db-pvc # Utilisation d'un PVC pour le stockage persistant
 ---
 apiVersion: v1
 kind: Service
@@ -37,3 +44,14 @@ spec:
       port: 30010
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fleetman-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi # Capacité de stockage demandée
