@@ -22,6 +22,13 @@ spec:
               value: "production-microservice" # Change for Kubernetes
           ports:
             - containerPort: 8080 # Replace with the actual port if required
+          volumeMounts:
+            - name: db-data
+              mountPath: /data/db # Mount point inside the container
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-data-pvc
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -37,3 +44,26 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-data-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/db # Path on the host machine for local storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
